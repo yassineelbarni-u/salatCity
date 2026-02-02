@@ -7,7 +7,11 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Players from './prayers';
-import img1 from '../assets/images/img1.png';
+import fajrImg from '../assets/images/fajr.png';
+import dhuhrImg from '../assets/images/dhuhr.png';
+import asrImg from '../assets/images/asr.png';
+import maghribImg from '../assets/images/maghrib.png';
+import ishaImg from '../assets/images/isha.png';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import moment from 'moment';
@@ -106,11 +110,11 @@ export default function MainContent() {
     <Divider style={{ borderColor: "white", opacity: "0.2" }} />
     {/* cards prayers */}
     <Stack direction="row" spacing={2} justifyContent="space-around" alignItems="center" style={{ marginTop: "20px" }}>
-      <Players name="fajr" duree={timings.Fajr} image={img1} />
-      <Players name="dhuhr" duree={timings.Dhuhr} image={img1} />
-      <Players name="asr" duree={timings.Asr} image={img1} />
-      <Players name="maghrib" duree={timings.Maghrib} image={img1} />
-      <Players name="isha" duree={timings.Isha} image={img1} />
+      <Players name="fajr" duree={timings.Fajr} image={fajrImg} />
+      <Players name="dhuhr" duree={timings.Dhuhr} image={dhuhrImg} />
+      <Players name="asr" duree={timings.Asr} image={asrImg} />
+      <Players name="maghrib" duree={timings.Maghrib} image={maghribImg} />
+      <Players name="isha" duree={timings.Isha} image={ishaImg} />
 
     </Stack>
 
