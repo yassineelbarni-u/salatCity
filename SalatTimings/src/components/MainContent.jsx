@@ -26,13 +26,13 @@ export default function MainContent() {
   const [selectedCity, setSelectedCity] = useState("casablanca");
 
   const getTimings = async () => {
-    const response = await axios.get("https://api.aladhan.com/v1/timingsByCity?city=tanger&country=Morocco&method=2");
+    const response = await axios.get(`https://api.aladhan.com/v1/timingsByCity?city=${selectedCity}&country=Morocco&method=2`);
     setTimings(response.data.data.timings);
   };
 
   useEffect(() => {
     getTimings();
-  }, []);
+  }, [selectedCity]);
 
 
 
