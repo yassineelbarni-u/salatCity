@@ -10,6 +10,7 @@ import Players from './prayers';
 import img1 from '../assets/images/img1.png';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import moment from 'moment';
 
 
 export default function MainContent() {
@@ -23,43 +24,86 @@ export default function MainContent() {
     Isha: ""
   });
 
-  const [selectedCity, setSelectedCity] = useState("casablanca");
+  const [selectedCity, setSelectedCity] = useState("Casablanca");
+
+  const [today, setToday] = useState("");
+
+  const [nextPrayer, setNextPrayer] = useState("");
+  // temps restant
+  const [timeRemaining, setTimeRemaining] = useState("");
 
   const getTimings = async () => {
     const response = await axios.get(`https://api.aladhan.com/v1/timingsByCity?city=${selectedCity}&country=Morocco&method=2`);
     setTimings(response.data.data.timings);
   };
 
+  const calculateNextPrayer = () => {
+    const now = moment();
+    const prayerNames = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+    for (let prayer of prayerNames) {
+      if (timings[prayer]) {
+        const prayerTime = moment(timings[prayer], "HH:mm");
+
+        if (prayerTime.isAfter(now)) {
+          const diff = moment.duration(prayerTime.diff(now));
+          const hours = Math.floor(diff.asHours());
+          const minutes = diff.minutes();
+          const seconds = diff.seconds();
+
+          setNextPrayer(prayer);
+          setTimeRemaining(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+          return;
+        }
+      }
+    }
+
+    if (timings.Fajr) {
+      const fajrTomorrow = moment(timings.Fajr, "HH:mm").add(1, 'day');
+      const diff = moment.duration(fajrTomorrow.diff(now));
+      const hours = Math.floor(diff.asHours());
+      const minutes = diff.minutes();
+      const seconds = diff.seconds();
+
+      setNextPrayer('Fajr');
+      setTimeRemaining(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    }
+  };
+
   useEffect(() => {
     getTimings();
   }, [selectedCity]);
 
-
-
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const t = moment().format("MMM Do YYYY | HH:mm:ss");
+      setToday(t);
+      calculateNextPrayer();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timings]);
 
   const handleCityChange = (event) => {
-    console.log("the new city is ", event.target.value);
     setSelectedCity(event.target.value);
   };
 
   return (<>
 
-    <Grid container >
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: "20px", padding: "0 20px" }}>
+      {/* Gauche: Compte à rebours */}
+      <div style={{ textAlign: "left" }}>
+        <h3 style={{ margin: 0, fontSize: "18px", opacity: 0.8 }}>Prochaine prière: {nextPrayer}</h3>
+        <h1 style={{ fontSize: "50px", margin: "10px 0 0 0", fontWeight: "bold" }}>{timeRemaining || "00:00:00"}</h1>
+      </div>
 
-      <Grid xs={6}>
-        <h2>12/01/2026</h2>
-        <p>{selectedCity}</p>
+      {/* Droite: Date et Ville */}
+      <div style={{ textAlign: "right" }}>
+        <h3 style={{ margin: 0, fontSize: "18px", opacity: 0.8 }}>{today}</h3>
+        <h1 style={{ fontSize: "50px", margin: "10px 0 0 0", fontWeight: "bold" }}>{selectedCity}</h1>
+      </div>
+    </div>
 
-
-      </Grid>
-      <Grid xs={6}>
-        <h2>motabaqi hata salat al fajr</h2>
-        <p>04:00</p>
-
-      </Grid>
-    </Grid>
-
-    <Divider style={{ borderColor: "red" }} />
+    <Divider style={{ borderColor: "white", opacity: "0.2" }} />
     {/* cards prayers */}
     <Stack direction="row" spacing={2} justifyContent="space-around" alignItems="center" style={{ marginTop: "20px" }}>
       <Players name="fajr" duree={timings.Fajr} image={img1} />
@@ -77,7 +121,6 @@ export default function MainContent() {
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          // value={age}
           label="ville"
           onChange={handleCityChange}
         >
